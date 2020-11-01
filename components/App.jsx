@@ -1,6 +1,17 @@
 import React, {useEffect, useCallback, useState} from 'react';
-import {StyleSheet, Text, View, SafeAreaView, Image} from 'react-native';
+import {StyleSheet} from 'react-native';
+import {composeWithDevTools} from 'redux-devtools-extension';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
+import {createStackNavigator} from '@react-navigation/stack';
+import rootReducer from '../reducer';
+import Search from './Search/Search';
+import Toast from './Toast/Toast';
+import Loading from './Loading/Loading';
 
+const myStore = createStore(rootReducer, composeWithDevTools());
+const Stack = createStackNavigator();
 const apiKey = 'exlublKURdfjHJrGe41zD7dTDsbfKTCF';
 
 export default function App() {
@@ -30,40 +41,44 @@ export default function App() {
       });
   }, []);
 
-  useEffect(() => {
-    __getServerInfo();
-    __getCharacterInfo();
-    return () => {};
-  }, []);
+  // useEffect(() => {
+  //   __getServerInfo();
+  //   __getCharacterInfo();
+  //   return () => {};
+  // }, []);
 
   return (
-    <SafeAreaView style={{flex: 1}}>
-      <View>
-        {servers
-          ? servers.map(({serverId, serverName}, idx) => {
-              return (
-                <View key={idx}>
-                  <Text>
-                    {serverId} : {serverName}
-                  </Text>
-                </View>
-              );
-            })
-          : undefined}
-      </View>
-      <View style={{flex: 1}}>
-        <Image
-          style={{width: 150, height: 150}}
-          source={{
-            uri:
-              'http://img-api.neople.co.kr/df/servers/anton/characters/b6cc7cbfdced8f00b087af634708f718?zoom=1',
-          }}
-        />
-        <Text>0.3초본드</Text>
-        <Text>{characterInfo}</Text>
-      </View>
-    </SafeAreaView>
+    <Provider store={myStore}>
+      <MyNavigator />
+    </Provider>
   );
 }
+
+const MyNavigator = () => {
+  return (
+    <NavigationContainer>
+      <SwitchNavigation />
+      <Toast />
+      <Loading />
+    </NavigationContainer>
+  );
+};
+
+const SwitchNavigation = () => {
+  return (
+    <Stack.Navigator initialRouteName="search">
+      <Stack.Screen
+        name="search"
+        component={Search}
+        options={{
+          headerShown: false,
+          cardStyle: {
+            backgroundColor: 'white',
+          },
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
 
 const styles = StyleSheet.create({});
